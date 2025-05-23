@@ -9,16 +9,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Food List App',
-      theme: ThemeData(primarySwatch: Colors.green),
+      title: 'Registration/Login App',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: SplashScreen(),
     );
   }
 }
 
-// ========================
-// 1. Splash Screen
-// ========================
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -31,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Timer(Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => FoodListScreen()),
+        MaterialPageRoute(builder: (context) => RegistrationScreen()),
       );
     });
   }
@@ -40,123 +38,133 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: FlutterLogo(size: 100), // Replace with your logo
+        child: FlutterLogo(size: 100),
       ),
     );
   }
 }
 
-// ========================
-// 2. Food List Screen
-// ========================
-class FoodListScreen extends StatelessWidget {
-  final List<Map<String, String>> foodItems = [
-    {
-      'image': 'assets/burger.jpg',
-      'name': 'Burger',
-      'description': 'A delicious beef burger with cheese.'
-    },
-    {
-      'image': 'assets/pizza.jpg',
-      'name': 'Pizza',
-      'description': 'Cheesy pepperoni pizza slice.'
-    },
-    {
-      'image': 'assets/salad.jpg',
-      'name': 'Salad',
-      'description': 'Fresh green salad with tomatoes.'
-    },
-  ];
+class RegistrationScreen extends StatefulWidget {
+  @override
+  _RegistrationScreenState createState() => _RegistrationScreenState();
+}
+
+class _RegistrationScreenState extends State<RegistrationScreen> {
+  final _formKey = GlobalKey<FormState>();
+  String username = '', email = '', password = '', confirmPassword = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Food Items')),
-      body: ListView.builder(
-        itemCount: foodItems.length,
-        itemBuilder: (context, index) {
-          return FoodItemCard(item: foodItems[index]);
-        },
+      appBar: AppBar(title: Text('Register')),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Username'),
+                validator: (value) => value!.isEmpty ? 'Required' : null,
+                onSaved: (value) => username = value!,
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Email'),
+                validator: (value) => value!.isEmpty ? 'Required' : null,
+                onSaved: (value) => email = value!,
+              ),
+              TextFormField(
+                obscureText: true,
+                decoration: InputDecoration(labelText: 'Password'),
+                validator: (value) => value!.isEmpty ? 'Required' : null,
+                onSaved: (value) => password = value!,
+              ),
+              TextFormField(
+                obscureText: true,
+                decoration: InputDecoration(labelText: 'Confirm Password'),
+                validator: (value) => value != password ? 'Passwords do not match' : null,
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LoginScreen(
+                          registeredUsername: username,
+                          registeredPassword: password,
+                        ),
+                      ),
+                    );
+                  }
+                },
+                child: Text('Register'),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-// ========================
-// Food Item Widget
-// ========================
-class FoodItemCard extends StatefulWidget {
-  final Map<String, String> item;
+class LoginScreen extends StatefulWidget {
+  final String registeredUsername;
+  final String registeredPassword;
 
-  FoodItemCard({required this.item});
+  LoginScreen({required this.registeredUsername, required this.registeredPassword});
 
   @override
-  _FoodItemCardState createState() => _FoodItemCardState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _FoodItemCardState extends State<FoodItemCard>
-    with SingleTickerProviderStateMixin {
-  bool isLiked = false;
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: Duration(milliseconds: 300),
-      vsync: this,
-      lowerBound: 0.7,
-      upperBound: 1.2,
-    );
-    _scaleAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void toggleLike() {
-    setState(() {
-      isLiked = !isLiked;
-    });
-    _controller.forward().then((_) => _controller.reverse());
-  }
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  String username = '', password = '';
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.all(10),
-      child: Padding(
-        padding: EdgeInsets.all(8),
-        child: Row(
-          children: [
-            Image.asset(widget.item['image']!, width: 80, height: 80, fit: BoxFit.cover),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(widget.item['name']!, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 5),
-                  Text(widget.item['description']!),
-                ],
+    return Scaffold(
+      appBar: AppBar(title: Text('Login')),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Username/Email'),
+                validator: (value) => value!.isEmpty ? 'Required' : null,
+                onSaved: (value) => username = value!,
               ),
-            ),
-            GestureDetector(
-              onDoubleTap: toggleLike,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: Icon(
-                  Icons.favorite,
-                  color: isLiked ? Colors.red : Colors.grey,
-                  size: 30,
-                ),
+              TextFormField(
+                obscureText: true,
+                decoration: InputDecoration(labelText: 'Password'),
+                validator: (value) => value!.isEmpty ? 'Required' : null,
+                onSaved: (value) => password = value!,
               ),
-            ),
-          ],
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    if (username == widget.registeredUsername && password == widget.registeredPassword) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Login Successful')),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Login Failed')),
+                      );
+                    }
+                  }
+                },
+                child: Text('Login'),
+              )
+            ],
+          ),
         ),
       ),
     );
