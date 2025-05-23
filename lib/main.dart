@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // Root widget
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'University App',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      title: 'Food List App',
+      theme: ThemeData(primarySwatch: Colors.green),
       home: SplashScreen(),
     );
   }
@@ -19,114 +19,144 @@ class MyApp extends StatelessWidget {
 // ========================
 // 1. Splash Screen
 // ========================
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Timer(Duration(seconds: 2), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => FoodListScreen()),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: GestureDetector(
-          onDoubleTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SecondScreen()),
-            );
-          },
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.school, size: 100, color: Colors.blue),
-              SizedBox(height: 20),
-              Text('University App', style: TextStyle(fontSize: 24)),
-              Text('(Double Tap Logo to Proceed)', style: TextStyle(fontSize: 14)),
-            ],
-          ),
-        ),
+        child: FlutterLogo(size: 100), // Replace with your logo
       ),
     );
   }
 }
 
 // ========================
-// 2. Second Screen
+// 2. Food List Screen
 // ========================
-class SecondScreen extends StatelessWidget {
-  final List<Tab> myTabs = [
-    Tab(icon: Icon(Icons.person), text: 'About Me'),
-    Tab(icon: Icon(Icons.location_city), text: 'Hometown'),
-    Tab(icon: Icon(Icons.school_outlined), text: 'Student Life'),
-  ];
-
-  final List<String> tabContents = [
-    'My name is Atika Abid. I am a CS student.',
-    'My hometown is Karachi, a vibrant city in Pakistan.',
-    'I study at Bahria University. I love coding and exploring technology.',
-  ];
-
-  final List<String> detailedContents = [
-    'My name is Atika Abid. I am currently pursuing my degree in Computer Science. I love exploring new technologies, especially related to AI and Mobile Development.',
-    'Karachi is the largest city of Pakistan, known for its diverse culture, food, and coastal views.',
-    'At Bahria University, I have worked on various projects, gained practical experience, and participated in many tech and academic events.',
+class FoodListScreen extends StatelessWidget {
+  final List<Map<String, String>> foodItems = [
+    {
+      'image': 'assets/burger.jpg',
+      'name': 'Burger',
+      'description': 'A delicious beef burger with cheese.'
+    },
+    {
+      'image': 'assets/pizza.jpg',
+      'name': 'Pizza',
+      'description': 'Cheesy pepperoni pizza slice.'
+    },
+    {
+      'image': 'assets/salad.jpg',
+      'name': 'Salad',
+      'description': 'Fresh green salad with tomatoes.'
+    },
   ];
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: myTabs.length,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Atika Abid'),
-          bottom: TabBar(tabs: myTabs),
-        ),
-        body: TabBarView(
-          children: List.generate(myTabs.length, (index) {
-            return Center(
-              child: GestureDetector(
-                onLongPress: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ThirdScreen(detailedText: detailedContents[index]),
-                    ),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    tabContents[index],
-                    style: TextStyle(fontSize: 18),
-                    textAlign: TextAlign.center,
-                  ),
+    return Scaffold(
+      appBar: AppBar(title: Text('Food Items')),
+      body: ListView.builder(
+        itemCount: foodItems.length,
+        itemBuilder: (context, index) {
+          return FoodItemCard(item: foodItems[index]);
+        },
+      ),
+    );
+  }
+}
+
+// ========================
+// Food Item Widget
+// ========================
+class FoodItemCard extends StatefulWidget {
+  final Map<String, String> item;
+
+  FoodItemCard({required this.item});
+
+  @override
+  _FoodItemCardState createState() => _FoodItemCardState();
+}
+
+class _FoodItemCardState extends State<FoodItemCard>
+    with SingleTickerProviderStateMixin {
+  bool isLiked = false;
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: Duration(milliseconds: 300),
+      vsync: this,
+      lowerBound: 0.7,
+      upperBound: 1.2,
+    );
+    _scaleAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void toggleLike() {
+    setState(() {
+      isLiked = !isLiked;
+    });
+    _controller.forward().then((_) => _controller.reverse());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.all(10),
+      child: Padding(
+        padding: EdgeInsets.all(8),
+        child: Row(
+          children: [
+            Image.asset(widget.item['image']!, width: 80, height: 80, fit: BoxFit.cover),
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(widget.item['name']!, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 5),
+                  Text(widget.item['description']!),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onDoubleTap: toggleLike,
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: Icon(
+                  Icons.favorite,
+                  color: isLiked ? Colors.red : Colors.grey,
+                  size: 30,
                 ),
               ),
-            );
-          }),
-        ),
-      ),
-    );
-  }
-}
-
-// ========================
-// 3. Third Screen
-// ========================
-class ThirdScreen extends StatelessWidget {
-  final String detailedText;
-
-  ThirdScreen({required this.detailedText});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Details")),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Text(
-            detailedText,
-            style: TextStyle(fontSize: 18),
-            textAlign: TextAlign.justify,
-          ),
+            ),
+          ],
         ),
       ),
     );

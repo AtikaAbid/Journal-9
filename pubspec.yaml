@@ -70,6 +70,9 @@ flutter:
    - assets/dice_4.png 
    - assets/dice_5.png
    - assets/dice_6.png
+   - assets/burger.jpg
+   - assets/pizza.jpg
+   - assets/salad.jpg
 
 
 
