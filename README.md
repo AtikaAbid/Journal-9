@@ -1,16 +1,37 @@
-# flutter_application_6
 
-A new Flutter project.
+# Registration and Login App
 
-## Getting Started
+## 📱 Overview
+This Flutter app provides:
+- Splash screen
+- User registration form with validation
+- Login form with basic credential check
 
-This project is a starting point for a Flutter application.
+## 🚀 Features
+- Splash screen delays for 2 seconds
+- Form validation (username, email, password, confirm password)
+- Login screen accepts predefined user data and provides success/failure messages
 
-A few resources to get you started if this is your first Flutter project:
+## 📂 Project Structure
+```
+lib/
+├── main.dart
+├── splash_screen.dart
+├── registration_screen.dart
+└── login_screen.dart
+assets/
+└── logo.png
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🛠️ Setup
+1. Place your logo in `assets/`.
+2. Add this in `pubspec.yaml`:
+```yaml
+flutter:
+  assets:
+    - assets/logo.png
+```
+3. Run the app:
+```bash
+flutter run
+```
